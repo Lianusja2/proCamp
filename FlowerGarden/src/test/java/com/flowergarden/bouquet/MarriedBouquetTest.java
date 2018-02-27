@@ -3,6 +3,7 @@ package com.flowergarden.bouquet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
 import org.junit.Assert;
@@ -10,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.flowergarden.flowers.Chamomile;
+import com.flowergarden.flowers.GeneralFlower;
 import com.flowergarden.flowers.Rose;
 
 /**
@@ -36,12 +38,22 @@ public class MarriedBouquetTest {
     }
 
     @Test
-    public void getPriceTest() {
+    public void getPricePositiveTest() {
         Assert.assertEquals(175.53, marriedBouquet.getPrice(), 0.01);
     }
 
     @Test
-    public void searchFlowersByLenghtTest() {
-        Assert.assertEquals(marriedBouquet.searchFlowersByLenght(23, 27), Collections.singletonList(rose));
+    public void searchFlowersByLenghtPositiveTest() {
+        Assert.assertEquals(Collections.singletonList(rose), marriedBouquet.searchFlowersByLenght(23, 27));
+    }
+
+    @Test
+    public void searchFlowersByLenghtWhenMinGraterThanMaxTest() {
+        Assert.assertEquals(new ArrayList<GeneralFlower>(),marriedBouquet.searchFlowersByLenght(27, 20));
+    }
+
+    @Test
+    public void searchFlowersByLenghtWithNegativeMinMaxValuesTest() {
+        Assert.assertEquals(new ArrayList<GeneralFlower>(),marriedBouquet.searchFlowersByLenght(-10, -1));
     }
 }
