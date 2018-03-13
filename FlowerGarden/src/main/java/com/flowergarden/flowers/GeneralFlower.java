@@ -5,38 +5,52 @@ import javax.xml.bind.annotation.XmlElement;
 import com.flowergarden.properties.FreshnessInteger;
 
 public class GeneralFlower implements Flower<Integer>, Comparable<GeneralFlower> {
-	
-	FreshnessInteger freshness;
-	
-	@XmlElement
-	float price;
-	
-	@XmlElement
-	int lenght;
-	
-	public void setFreshness(FreshnessInteger fr){
-		freshness = fr;
-	}
-	
-	@Override
-	public FreshnessInteger getFreshness() {
-		return freshness;
-	}
 
-	@Override
-	public float getPrice() {
-		return price;
-	}
+    FreshnessInteger freshness;
+    private int id;
 
-	@Override
-	public int getLenght() {
-		return lenght;
-	}
 
-	@Override
-	public int compareTo(GeneralFlower compareFlower) {
-		int compareFresh = compareFlower.getFreshness().getFreshness();		
-		return this.getFreshness().getFreshness() - compareFresh;
-	}
+    @XmlElement
+    float price;
+
+    @XmlElement
+    int lenght;
+
+    public void setFreshness(FreshnessInteger fr) {
+        freshness = fr;
+    }
+
+    @Override
+    public FreshnessInteger getFreshness() {
+        return freshness;
+    }
+
+    @Override
+    public float getPrice() {
+        return price;
+    }
+
+    @Override
+    public int getLenght() {
+        return lenght;
+    }
+
+
+    @Override
+    public int compareTo(GeneralFlower compareFlower) {
+        int compareFresh = compareFlower.getFreshness().getFreshness();
+        return this.getFreshness().getFreshness() - compareFresh;
+    }
+
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(int id) {
+        this.id = id;
+    }
 
 }

@@ -6,4 +6,10 @@ public interface Flower<T> {
 	Freshness<T> getFreshness();
 	float getPrice();
 	int getLenght();
+	int getId();
+	void setId(int id);
+
+
+
+
 }
