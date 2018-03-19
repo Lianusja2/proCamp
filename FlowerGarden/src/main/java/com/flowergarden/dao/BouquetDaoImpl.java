@@ -7,27 +7,39 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.dbcp.BasicDataSource;
+
 import com.flowergarden.bouquet.Bouquet;
 import com.flowergarden.bouquet.MarriedBouquet;
 import com.flowergarden.flowers.Flower;
 
-public class BouquetDaoImpl implements BouquetDao {
-    private final Connection connection;
 
-    BouquetDaoImpl(Connection connection) {
-        this.connection = connection;
+public class BouquetDaoImpl implements BouquetDao {
+    private final BasicDataSource basicDataSource;
+    private FlowerDao flowerDao;
+
+    BouquetDaoImpl(BasicDataSource basicDataSource) {
+        this.basicDataSource = basicDataSource;
+
+    }
+
+    public void setFlowerDao(FlowerDao flowerDao) {
+        this.flowerDao = flowerDao;
     }
 
     @Override
     public Bouquet read(int id) throws SQLException {
         String sql = "SELECT * FROM bouquet WHERE id = ?;";
-        PreparedStatement stm = connection.prepareStatement(sql);
-        stm.setInt(1, id);
-        ResultSet rs = stm.executeQuery();
-        rs.next();
-        Bouquet bouquet = parseBouquet(rs);
-        List<Flower> flowers = new FlowerDaoImpl(connection).getAllFlowersInBouquet(bouquet.getId());
-        flowers.forEach(flower -> bouquet.addFlower(flower));
+        Bouquet bouquet = null;
+        try (Connection connection = basicDataSource.getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(sql);
+            stm.setInt(1, id);
+            ResultSet rs = stm.executeQuery();
+            rs.next();
+            bouquet = parseBouquet(rs);
+            List<Flower> flowers = flowerDao.getAllFlowersInBouquet(bouquet.getId());
+            flowers.forEach(bouquet::addFlower);
+        }
         return bouquet;
     }
 
@@ -45,11 +57,13 @@ public class BouquetDaoImpl implements BouquetDao {
     public List<Bouquet> getAll() throws SQLException {
         String sql = "SELECT * FROM bouquet;";
         List<Bouquet> bouquets = new ArrayList<>();
-        PreparedStatement stm = connection.prepareStatement(sql);
-        ResultSet rs = stm.executeQuery();
-        while (rs.next()) {
-            bouquets.add(parseBouquet(rs));
+        try (Connection connection = basicDataSource.getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(sql);
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                bouquets.add(parseBouquet(rs));
+            }
+            return bouquets;
         }
-        return bouquets;
     }
 }

@@ -6,6 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.dbcp.BasicDataSource;
 
 import com.flowergarden.flowers.Chamomile;
 import com.flowergarden.flowers.Flower;
@@ -14,20 +17,23 @@ import com.flowergarden.properties.FreshnessInteger;
 
 
 public class FlowerDaoImpl implements FlowerDao {
-    private final Connection connection;
+    private final BasicDataSource basicDataSource;
 
-    FlowerDaoImpl(Connection connection) {
-        this.connection = connection;
+    FlowerDaoImpl(BasicDataSource basicDataSource) {
+        this.basicDataSource = basicDataSource;
     }
 
     @Override
     public Flower read(int id) throws SQLException {
         String sql = "SELECT * FROM flower WHERE id = ?;";
-        PreparedStatement stm = connection.prepareStatement(sql);
-        stm.setInt(1, id);
-        ResultSet rs = stm.executeQuery();
-        rs.next();
-        return parseFlower(rs);
+        ResultSet rs = null;
+        try (Connection connection = basicDataSource.getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(sql);
+            stm.setInt(1, id);
+            rs = stm.executeQuery();
+            rs.next();
+        }
+        return Objects.isNull(rs) ? null : parseFlower(rs);
     }
 
     private Flower parseFlower(ResultSet rs) throws SQLException {
@@ -56,27 +62,31 @@ public class FlowerDaoImpl implements FlowerDao {
     public List<Flower> getAll() throws SQLException {
         String sql = "SELECT * FROM flower;";
         List<Flower> flowers = new ArrayList<>();
-        PreparedStatement stm = connection.prepareStatement(sql);
-        ResultSet rs = stm.executeQuery();
-        while (rs.next()) {
-            Flower flower = parseFlower(rs);
-            flowers.add(flower);
+        try (Connection connection = basicDataSource.getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(sql);
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                Flower flower = parseFlower(rs);
+                flowers.add(flower);
+            }
+            return flowers;
         }
-        return flowers;
     }
 
     @Override
     public List<Flower> getAllFlowersInBouquet(int bouquetId) throws SQLException {
         String sql = "SELECT * FROM flower WHERE bouquet_id = ?;";
         List<Flower> flowers = new ArrayList<>();
-        PreparedStatement stm = connection.prepareStatement(sql);
-        stm.setInt(1, bouquetId);
-        ResultSet rs = stm.executeQuery();
-        while (rs.next()) {
-            Flower flower = parseFlower(rs);
-            flowers.add(flower);
+        try (Connection connection = basicDataSource.getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(sql);
+            stm.setInt(1, bouquetId);
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                Flower flower = parseFlower(rs);
+                flowers.add(flower);
+            }
+            return flowers;
         }
-        return flowers;
     }
 
 }
